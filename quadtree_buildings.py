@@ -75,12 +75,11 @@ def test(ntests = 100, test_on_gdansk = False):
                 exec_times.append(execution_time)
 
                 if i == ntests - 1:
-
                     # Visualize the found polygons in red, the original polygons in blue
                     import matplotlib.pyplot as plt
                     ax = gpd.GeoSeries(polygon_query.polygons).plot(color='blue')
                     gpd.GeoSeries(result).plot(ax=ax, color='red')
-                    ax.set_title("Query result, last test. Avg time: " + str(sum(exec_times) / ntests) + " seconds")
+                    ax.set_title(f'Query result, last test. Avg time: {sum(exec_times) / ntests:.5f} seconds')
                     ax.set_axis_off()
                     
                     # Add start and end coordinates to the plot

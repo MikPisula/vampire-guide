@@ -1,0 +1,10 @@
+osmnx==1.9.3
+folium==0.16.0
+haversine==2.8.1
+mpire==2.10.2
+numpy==1.26.4
+scipy==1.13.1
+shapely==2.0.4
+geopandas==0.14.4
+tqdm==4.66.2
+matplotlib==3.8.3

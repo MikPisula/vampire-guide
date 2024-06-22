@@ -4,8 +4,8 @@ import haversine as hs # geocords to meters
 import mpire
 import multiprocessing as mp
 
-start_location = (40.748817, -73.985428)  # Example: New York (Latitude, Longitude)
-end_location = (40.730610, -73.935242)    # Example: New York (Latitude, Longitude)
+start_location = (54.354785, 18.590372)  # Example: New York (Latitude, Longitude)
+end_location = (54.416413, 18.658882)    # Example: New York (Latitude, Longitude)
 
 margin = 0.1
 

@@ -11,6 +11,9 @@ from pathlib import Path
 def test():
     start_location = (40.748817, -73.985428)  # New York (Latitude, Longitude)
     end_location = (40.730610, -73.935242)    # New York (Latitude, Longitude)
+    
+    midpoint = ((start_location[0] + end_location[0]) / 2, (start_location[1] + end_location[1]) / 2)
+    m = folium.Map(location=midpoint, zoom_start=13, tiles="OpenStreetMap")
 
     buildings_path = Path("data/buildings_dwnld.json")
     if buildings_path.exists():
@@ -19,25 +22,31 @@ def test():
         buildings: gpd.GeoDataFrame = ox.features_from_bbox(bbox=(start_location[0], end_location[0], start_location[1], end_location[1]), tags={"building": True})
         buildings['height'] = buildings['height'].astype(float)
         buildings['height'] = buildings['height'].fillna(5.0)
-        buildings_path.write_text(buildings.to_json())
+        buildings_path.write_text(buildings[['geometry', 'height']].to_json())
 
     shadows_path = Path("data/shadows.json")
     if shadows_path.exists():
         shadows = gpd.read_file(shadows_path)
+        shadows = shapely.MultiPolygon()
     else:
-        shadows: gpd.GeoDataFrame = calculate_polygon_shade(buildings, pd.Timestamp("2022-06-21 14:00:00"))
-        shadows_path.write_text(shadows.to_json())
+        shadows: shapely.MultiPolygon = shapely.union_all(calculate_polygon_shade(buildings, pd.Timestamp("2022-06-21 14:00:00"))['geometry'])
+        print(shadows)
+        shadows_path.write_text(gpd.GeoSeries([shadows]).to_json())
 
-    shadows_mp: shapely.MultiPolygon = shapely.union_all(shadows['geometry'])
 
     network_path = Path("data/network.graphml")
     if network_path.exists():
         G = ox.load_graphml(network_path, edge_dtypes={'sun_length': float})
     else:
         G = ox.graph_from_bbox(bbox=(start_location[0], end_location[0], start_location[1], end_location[1]), network_type='walk')
-        add_intersection_length(G, shadows_mp, 'sun_length')
+        add_intersection_length(G, shadows, 'sun_length')
         ox.save_graphml(G, network_path)
-
+        
+    folium.Rectangle(((start_location[0], start_location[1]), (end_location[0], end_location[1])), color='green').add_to(m)
+        
+    for edge in G.edges:
+        folium.PolyLine(((G.nodes[edge[0]]['y'], G.nodes[edge[0]]['x']), (G.nodes[edge[1]]['y'], G.nodes[edge[1]]['x'])), color='red').add_to(m)
+        
     # Get the nearest nodes to the start and end points
     orig_node = ox.distance.nearest_nodes(G, start_location[1], start_location[0])
     dest_node = ox.distance.nearest_nodes(G, end_location[1], end_location[0])
@@ -48,8 +57,6 @@ def test():
 
     print("Found shortest path!")
     
-    midpoint = ((start_location[0] + end_location[0]) / 2, (start_location[1] + end_location[1]) / 2)
-    m = folium.Map(location=midpoint, zoom_start=13, tiles="OpenStreetMap")
 
     for geometry in buildings['geometry']:
         if not hasattr(geometry, 'exterior'):
@@ -60,7 +67,7 @@ def test():
         inverted_coords = tuple((y, x) for x, y in geometry.exterior.coords)
         folium.Polygon(inverted_coords, fill_color="#bbb", weight=0, fill_opacity=1).add_to(m)
 
-    for polygon in list(shadows_mp.geoms):
+    for polygon in list(shadows.geoms):
         try:
             inverted_coords = tuple((y, x) for x, y in polygon.exterior.coords)
             folium.Polygon(inverted_coords, fill_color='black', fill_opacity=0.5, weight=0).add_to(m)

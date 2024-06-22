@@ -39,7 +39,7 @@ def retrieve_route_polygons(start_location: tuple[float, float],
     route_coords = [(G.nodes[node]['y'], G.nodes[node]['x']) for node in shortest_path]
 
     # Extract building polygons along the route
-    allbldgs: List[gpd.GeoDataFrame] = []
+    allbldgs: List[gpd.GeoDataFrame] | gpd.GeoDataFrame = []
     for node in route_coords:
         allbldgs.append(ox.features_from_point(node, {"building": True}, polygon_buffer_dist))
     allbldgs = pd.concat(allbldgs)

@@ -8,7 +8,7 @@ import shapely
 
 from pathlib import Path
 
-def test():
+def test(html_output: str = "asd.html"):
     start_location = (40.748817, -73.985428)  # New York (Latitude, Longitude)
     end_location = (40.730610, -73.935242)    # New York (Latitude, Longitude)
 
@@ -79,7 +79,7 @@ def test():
     folium.Marker(location=start_location, popup='Start', icon=folium.Icon(color='green')).add_to(m)
     folium.Marker(location=end_location, popup='End', icon=folium.Icon(color='red')).add_to(m)
 
-    m.save("asd.html")
+    m.save(html_output)
 
 
 

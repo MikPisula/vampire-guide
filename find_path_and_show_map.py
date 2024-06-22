@@ -1,6 +1,8 @@
 import osmnx as ox
 import folium
 import haversine as hs # geocords to meters 
+import mpire
+import multiprocessing as mp
 
 start_location = (40.748817, -73.985428)  # Example: New York (Latitude, Longitude)
 end_location = (40.730610, -73.935242)    # Example: New York (Latitude, Longitude)
@@ -33,17 +35,35 @@ folium.PolyLine(route_coords, color='blue', weight=5, opacity=0.7).add_to(m)
 folium.Marker(location=start_location, popup='Start', icon=folium.Icon(color='green')).add_to(m)
 folium.Marker(location=end_location, popup='End', icon=folium.Icon(color='red')).add_to(m)
 
-for node in route_coords:
-    buildings = ox.features_from_point(node, {"building": True}, 50)
+def handle_node(poly_q: mp.SimpleQueue, node_y: float, node_x: float) -> None:
+    buildings = ox.features_from_point((node_y, node_x), {"building": True}, 50)
 
     for geometry in buildings['geometry']:
-        try:
-            coords = tuple(geometry.exterior.coords)
-            inverted_coords = tuple((y, x) for x, y in coords)
-            
-            folium.Polygon(inverted_coords).add_to(m)
-        except Exception as e:
-            print(e)
+        if not hasattr(geometry, 'exterior'):
+            continue
+        inverted_coords = tuple((y, x) for x, y in geometry.exterior.coords)
+        poly_q.put(inverted_coords)
+
+class StopProcessing:
+    pass
+
+def add_polygons_to_map(poly_q: mp.SimpleQueue) -> None:
+    while True:
+        inverted_coords = poly_q.get()
+        if isinstance(inverted_coords, StopProcessing):
+            break
+        folium.Polygon(inverted_coords).add_to(m)
+
+
+with mpire.WorkerPool(pass_worker_id=False) as pool:
+    poly_q = mp.SimpleQueue()
+    pool.set_shared_objects(poly_q)
+    polys_process = mp.Process(target=add_polygons_to_map, args=(poly_q,))
+    polys_process.start()
+    pool.map_unordered(handle_node, route_coords, progress_bar=True)
+    poly_q.put(StopProcessing())
+    poly_q.close()
+    polys_process.join()
     
 # Save the map to an HTML file
 m.save('shortest_path_map.html')

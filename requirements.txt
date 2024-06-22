@@ -9,3 +9,5 @@ geopandas==0.14.4
 tqdm==4.66.2
 matplotlib==3.8.3
 pybdshadow==0.3.5
+fastapi==0.111.0
+fastapi-cli==0.0.4

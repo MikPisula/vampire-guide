@@ -1,6 +1,5 @@
 import csv
 import tempfile
-import itertools
 
 import numpy as np
 from scipy.spatial import KDTree
@@ -10,7 +9,6 @@ from shapely import wkt
 
 import geopandas as gpd
 import time
-import shapely.wkt
 
 class PolygonQuery:
     def __init__(self, csv_file):
@@ -20,14 +18,13 @@ class PolygonQuery:
         self.kdtree = KDTree(self.midpoints)
 
     def load_polygons(self, csv_file):
-        with open(csv_file, newline='') as csvfile:
+        with open(csv_file, newline='', encoding='utf-8') as csvfile:
             reader = csv.reader(csvfile)
             polygon_column = None
             # Skip the header, remember the Polygon column
             for i, row in enumerate(reader):
                 if i == 0:
-                    print(row)
-                    polygon_column = row.index('Polygon')
+                    polygon_column = row.index('geometry')
                     continue
                 polygon_str = row[polygon_column]
                 polygon = wkt.loads(polygon_str)
@@ -48,7 +45,7 @@ def test(ntests = 100, test_on_gdansk = True):
 
     import tqdm
 
-    with tempfile.NamedTemporaryFile(delete=True, mode='w', newline='') as temp_csv:
+    with tempfile.NamedTemporaryFile(delete=False, mode='w', newline='') as temp_csv:
 
             buildings = None
             buildings_name = None

@@ -4,7 +4,7 @@ import tempfile
 import numpy as np
 from scipy.spatial import KDTree
 
-from shapely.geometry import box
+from shapely.geometry import box, Polygon
 from shapely import wkt
 
 import geopandas as gpd
@@ -12,7 +12,7 @@ import time
 
 class PolygonQuery:
     def __init__(self, csv_file):
-        self.polygons = []
+        self.polygons: list[Polygon] = []
         self.midpoints = []
         self.load_polygons(csv_file)
         self.kdtree = KDTree(self.midpoints)
@@ -32,8 +32,14 @@ class PolygonQuery:
                 self.polygons.append(polygon)
                 self.midpoints.append(polygon.centroid.coords[0])
 
-    def query(self, minx, miny, maxx, maxy):
-        query_box = box(minx, miny, maxx, maxy)
+    def query(self, minx, miny, maxx, maxy, 
+              search_margin=0.1) -> list[Polygon]:
+
+        query_box = box(minx * (1 + search_margin), 
+                        miny * (1 + search_margin), 
+                        maxx * (1 + search_margin), 
+                        maxy * (1 + search_margin))
+        
         midpoints_in_box = self.kdtree.query_ball_point([(minx + maxx) / 2, (miny + maxy) / 2], 
                                                         max(maxx - minx, maxy - miny) / 2)
         result_polygons = [self.polygons[i] for i in midpoints_in_box if query_box.intersects(self.polygons[i])]

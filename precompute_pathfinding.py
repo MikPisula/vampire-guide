@@ -14,6 +14,8 @@ from calculate_polygon_shade import calculate_polygon_shade
 
 from shapely.geometry import Polygon, LineString
 
+import haversine as hs
+
 def generate_times() -> list[str]:
     """
         Returns ["1 09:00", "1 10:00", ..., "12 18:00", "12 19:00"]
@@ -50,7 +52,7 @@ class PrecomputedPathfinder:
     
     """
     
-    def __init__(self, city_name, verbose = True):
+    def __init__(self, city_name, shade_impact = 1, verbose = True):
         self.verbose = verbose
         self.city_name = city_name
 
@@ -62,6 +64,7 @@ class PrecomputedPathfinder:
         self.graphs = self._create_graph(city_name)
         self.was_loaded = False
 
+        self.shade_impact = shade_impact
 
     def _create_graph(self, city_name):
         """
@@ -125,8 +128,11 @@ class PrecomputedPathfinder:
 
         graphs = {}
         for time in tqdm(TIMES):
+
+            time_value = datetime.strptime(time, '%m %H:%M')
+
             edges = [
-                (u, v, self._calculate_edge(graph.nodes[u], graph.nodes[v], time))
+                (u, v, self._calculate_edge(graph.nodes[u], graph.nodes[v], time_value))
                 for u, v, k, data in graph.edges(data=True, keys=True)
             ]
             graphs[time] = igraph.Graph.TupleList(edges=edges, directed=False)
@@ -142,6 +148,8 @@ class PrecomputedPathfinder:
 
         x1, y1 = start['x'], start['y']
         x2, y2 = end['x'], end['y']
+
+        distance = hs.haversine((x1, y1), (x2, y2))
 
         proportion_in_shade = 0
 
@@ -164,7 +172,7 @@ class PrecomputedPathfinder:
                 intersection: float = shade.intersection(line).length
                 proportion_in_shade += intersection / line.length
 
-        return proportion_in_shade
+        return distance + proportion_in_shade
 
     def find_path(self, start, end):
         """

@@ -1,4 +1,4 @@
-from augment_graph import add_intersection_length
+from augment_graph import intersection_len_fun
 from calculate_polygon_shade import calculate_polygon_shade
 import osmnx as ox
 import pandas as pd
@@ -40,7 +40,7 @@ def test(html_output: str = "asd.html", start_location = (40.748817, -73.985428)
     dest_node = ox.distance.nearest_nodes(G, end_location[1], end_location[0])
 
     # Calculate the shortest path
-    shortest_path = ox.shortest_path(G, orig_node, dest_node, weight='sun_length')
+    shortest_path = ox.shortest_path(G, orig_node, dest_node, weight=intersection_len_fun(G, shadows_mp))
     normal_path = ox.shortest_path(G, orig_node, dest_node, weight='length')
 
     print("Found shortest path!")

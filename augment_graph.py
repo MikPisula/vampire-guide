@@ -1,18 +1,27 @@
 import shapely
 import networkx as nx
+import functools
+import math
 
-def add_intersection_length(G: nx.MultiDiGraph, polys: shapely.MultiPolygon, attr: str) -> None:
-    for u, v, k, data in list(G.edges(keys=True, data=True)):
-        if "geometry" not in data:
-            continue
-        edge_geom = data["geometry"]
+from collections.abc import Callable
 
-        if "length" not in data:
-            continue
-        length = data["length"]
+def intersection_len_fun(G: nx.MultiDiGraph, polys: shapely.MultiPolygon, alpha: float = 5, beta: float = 5) -> Callable[[int, int, dict], float]:
+    @functools.cache
+    def intersection_len_inner(u: int, v: int, edge_geom: shapely.LineString | None, len: float | None) -> float:
+        if edge_geom is None:
+            edge_geom = shapely.LineString([(G.nodes[u]['x'], G.nodes[u]['y']), (G.nodes[v]['x'], G.nodes[v]['y'])])
+        if len is None:
+            len = edge_geom.length
 
         intersection = edge_geom.intersection(polys)
-        G.edges[u, v, k][attr] = length - shapely.length(intersection)
+        return len  + alpha * math.exp((len - intersection.length) / beta)
+    
+    def intersection_len(u: int, v: int, data: dict) -> float:
+        edge_geom = data.get("geometry", None)
+        length = data.get("length", None)
+        return intersection_len_inner(u, v, edge_geom, length)
+
+    return intersection_len
 
 def test():
     shadows = shapely.MultiPolygon([shapely.geometry.box(0, 0, 1, 1)])

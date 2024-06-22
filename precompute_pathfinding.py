@@ -124,14 +124,12 @@ class PrecomputedPathfinder:
         """
 
         graphs = {}
-        for time in TIMES:
+        for time in tqdm(TIMES):
             edges = [
                 (u, v, self._calculate_edge(graph.nodes[u], graph.nodes[v], time))
                 for u, v, k, data in graph.edges(data=True, keys=True)
             ]
-
-            graphs[time] = igraph.Graph(edges=edges, directed=False)
-
+            graphs[time] = igraph.Graph.TupleList(edges=edges, directed=False)
         return graphs
 
     def _calculate_edge(self, start, end, time) -> float:
@@ -151,6 +149,7 @@ class PrecomputedPathfinder:
         if potential_polygons == []:
             proportion_in_shade = 0
         else: 
+            print(len(potential_polygons))
             potential_polygons_geometries = gpd.GeoSeries(potential_polygons)
             potential_polygons_gdf        = gpd.GeoDataFrame(
                                                 geometry=potential_polygons_geometries, 

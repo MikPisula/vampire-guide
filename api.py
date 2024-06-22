@@ -25,6 +25,8 @@ def test_augment(prefix_url = "/home/simon/Documents/vampire-guide/", start = "4
     end_location =  end.replace(' ', '').split(',')
     end_location = tuple(map(float, end_location))
     
+    print(f"{start_location=}, {end_location=}")
+    
     try:
         test(
             html_output=filename_html,

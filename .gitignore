@@ -4,3 +4,4 @@ shortest_path_map.html
 pybdshadow/**
 **/*.html
 __pycache__/**/*
+**/.vite/**/*

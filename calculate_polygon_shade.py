@@ -27,7 +27,7 @@ def calculate_polygon_shade(buildings: gpd.GeoDataFrame, date: pd.Timestamp) -> 
     buildings = pybdshadow.bd_preprocess(buildings)
 
     # Calculate the shadows
-    shadow_gdf = pybdshadow.bdshadow_sunlight(buildings, date, roof=True, include_building=False)
+    shadow_gdf = pybdshadow.bdshadow_sunlight(buildings, date, roof=False, include_building=False)
     return shadow_gdf
 
     # Extract shadow polygons from the GeoDataFrame

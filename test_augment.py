@@ -1,4 +1,4 @@
-from augment_graph import add_intersection_length
+from augment_graph import intersection_len_fun
 from calculate_polygon_shade import calculate_polygon_shade
 import osmnx as ox
 import pandas as pd
@@ -8,22 +8,20 @@ import shapely
 
 from pathlib import Path
 
-def test(html_output: str = "asd.html", start_location = (40.748817, -73.985428), end_location = (40.730610, -73.935242)):
+def test(html_output: str = "asd.html", start_location = (40.748817, -73.985428), end_location = (40.743291339946865, -73.98000681558766)):
     buildings_path = Path("data/buildings_dwnld.json")
     if buildings_path.exists():
         buildings = gpd.read_file(buildings_path)
     else:
         buildings: gpd.GeoDataFrame = ox.features_from_bbox(bbox=(start_location[0], end_location[0], start_location[1], end_location[1]), tags={"building": True})
+        buildings = buildings[['geometry', 'height']]
         buildings['height'] = buildings['height'].astype(float)
         buildings['height'] = buildings['height'].fillna(5.0)
         buildings_path.write_text(buildings.to_json())
 
     shadows_path = Path("data/shadows.json")
-    if shadows_path.exists():
-        shadows = gpd.read_file(shadows_path)
-    else:
-        shadows: gpd.GeoDataFrame = calculate_polygon_shade(buildings, pd.Timestamp("2022-06-21 14:00:00"))
-        shadows_path.write_text(shadows.to_json())
+    shadows: gpd.GeoDataFrame = calculate_polygon_shade(buildings, pd.Timestamp("2022-06-21 14:00:00"))
+    shadows_path.write_text(shadows.to_json())
 
     shadows_mp: shapely.MultiPolygon = shapely.union_all(shadows['geometry'])
 
@@ -32,7 +30,6 @@ def test(html_output: str = "asd.html", start_location = (40.748817, -73.985428)
         G = ox.load_graphml(network_path, edge_dtypes={'sun_length': float})
     else:
         G = ox.graph_from_bbox(bbox=(start_location[0], end_location[0], start_location[1], end_location[1]), network_type='walk')
-        add_intersection_length(G, shadows_mp, 'sun_length')
         ox.save_graphml(G, network_path)
 
     # Get the nearest nodes to the start and end points
@@ -40,7 +37,7 @@ def test(html_output: str = "asd.html", start_location = (40.748817, -73.985428)
     dest_node = ox.distance.nearest_nodes(G, end_location[1], end_location[0])
 
     # Calculate the shortest path
-    shortest_path = ox.shortest_path(G, orig_node, dest_node, weight='sun_length')
+    shortest_path = ox.shortest_path(G, orig_node, dest_node, weight=intersection_len_fun(G, shadows_mp))
     normal_path = ox.shortest_path(G, orig_node, dest_node, weight='length')
 
     print("Found shortest path!")

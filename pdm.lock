@@ -5,7 +5,7 @@
 groups = ["default"]
 strategy = ["cross_platform", "inherit_metadata"]
 lock_version = "4.4.1"
-content_hash = "sha256:f6c2198552bbe7dfb43ebc2b3dcccfaa2ee9056ce71bc82120b0fc6c93247ca9"
+content_hash = "sha256:798f738b79729fed7b111499747063beb283286c536fb27727730c57f68709be"
 
 [[package]]
 name = "anyio"
@@ -1102,6 +1102,21 @@ files = [
 ]
 
 [[package]]
+name = "mpire"
+version = "2.10.2"
+summary = "A Python package for easy multiprocessing, but faster than multiprocessing"
+groups = ["default"]
+dependencies = [
+    "pygments>=2.0",
+    "pywin32>=301; platform_system == \"Windows\"",
+    "tqdm>=4.27",
+]
+files = [
+    {file = "mpire-2.10.2-py3-none-any.whl", hash = "sha256:d627707f7a8d02aa4c7f7d59de399dec5290945ddf7fbd36cbb1d6ebb37a51fb"},
+    {file = "mpire-2.10.2.tar.gz", hash = "sha256:f66a321e93fadff34585a4bfa05e95bd946cf714b442f51c529038eb45773d97"},
+]
+
+[[package]]
 name = "nbclient"
 version = "0.10.0"
 requires_python = ">=3.8.0"
@@ -1619,7 +1634,7 @@ name = "pywin32"
 version = "306"
 summary = "Python for Window Extensions"
 groups = ["default"]
-marker = "sys_platform == \"win32\" and platform_python_implementation != \"PyPy\""
+marker = "sys_platform == \"win32\" and platform_python_implementation != \"PyPy\" or platform_system == \"Windows\""
 files = [
     {file = "pywin32-306-cp311-cp311-win32.whl", hash = "sha256:e65028133d15b64d2ed8f06dd9fbc268352478d4f9289e69c190ecd6818b6407"},
     {file = "pywin32-306-cp311-cp311-win_amd64.whl", hash = "sha256:a7639f51c184c0272e93f244eb24dafca9b1855707d94c192d4a0b4c01e1100e"},

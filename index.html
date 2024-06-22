@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leaflet Drag Points Example</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css">
+    <style>
+        #map {
+            height: 100vh;
+        }
+    </style>
+</head>
+<body>
+    <div id="map"></div>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script>
+        // Initialize the map and set its view to Manhattan, New York
+        var map = L.map('map').setView([40.7831, -73.9712], 13);
+
+        // Add OpenStreetMap tile layer
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        // Define initial coordinates for the two points
+        var point1 = [40.748817, -73.985428]; // Example: Empire State Building
+        var point2 = [40.706192, -74.009160]; // Example: Statue of Liberty
+
+        // Create draggable markers for the two points
+        var marker1 = L.marker(point1, { draggable: true }).addTo(map);
+        var marker2 = L.marker(point2, { draggable: true }).addTo(map);
+
+        // Optional: Add popup messages to the markers
+        marker1.bindPopup("Drag me! Point 1");
+        marker2.bindPopup("Drag me! Point 2");
+
+        // Handle drag events if you want to do something on drag end
+        marker1.on('dragend', function (event) {
+            var position = marker1.getLatLng();
+            console.log('Marker 1 dragged to:', position);
+        });
+
+        marker2.on('dragend', function (event) {
+            var position = marker2.getLatLng();
+            console.log('Marker 2 dragged to:', position);
+        });
+    </script>
+</body>
+</html>

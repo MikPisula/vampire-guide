@@ -22,11 +22,14 @@ class PolygonQuery:
     def load_polygons(self, csv_file):
         with open(csv_file, newline='') as csvfile:
             reader = csv.reader(csvfile)
-
-            # Skip the header
-            for row in itertools.islice(reader, 1, None):
-
-                polygon_str = row[-1]
+            polygon_column = None
+            # Skip the header, remember the Polygon column
+            for i, row in enumerate(reader):
+                if i == 0:
+                    print(row)
+                    polygon_column = row.index('Polygon')
+                    continue
+                polygon_str = row[polygon_column]
                 polygon = wkt.loads(polygon_str)
 
                 self.polygons.append(polygon)
@@ -39,20 +42,28 @@ class PolygonQuery:
         result_polygons = [self.polygons[i] for i in midpoints_in_box if query_box.intersects(self.polygons[i])]
         return result_polygons
 
-def test(ntests = 100, test_on_gdansk = False):
+def test(ntests = 100, test_on_gdansk = True):
 
     exec_times = []
 
     import tqdm
 
-    with tempfile.NamedTemporaryFile(delete=False, mode='w', newline='') as temp_csv:
-            
-            # Load buildings data and write to the temporary .csv file
-            buildings = gpd.read_file('data/buildings.json')
-            buildings.to_csv(temp_csv.name)
+    with tempfile.NamedTemporaryFile(delete=True, mode='w', newline='') as temp_csv:
+
+            buildings = None
+            buildings_name = None
+            if test_on_gdansk:
+                # Gdansk is already in .csv format
+                # buildings = gpd.read_file('data/buildings_gdansk.csv')
+                buildings_name = 'data/buildings_gdansk.csv'
+            else: 
+                # Load buildings data and write to the temporary .csv file
+                buildings = gpd.read_file('data/buildings_suzhou.json')
+                buildings.to_csv(temp_csv.name)
+                buildings_name = temp_csv.name
 
             # Load the polygons from the .csv file
-            polygon_query = PolygonQuery(temp_csv.name)
+            polygon_query = PolygonQuery(buildings_name)
 
             for i in tqdm.tqdm(range(ntests)):
                 # Create a temporary .csv file

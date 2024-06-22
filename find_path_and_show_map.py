@@ -1,8 +1,14 @@
 import osmnx as ox
 import folium
+import haversine as hs # geocords to meters 
 
 start_location = (40.748817, -73.985428)  # Example: New York (Latitude, Longitude)
 end_location = (40.730610, -73.935242)    # Example: New York (Latitude, Longitude)
+
+margin = 0.1
+
+search_radius = 1000 * (margin + 1) * hs.haversine(start_location, end_location) / 2
+print(search_radius)
 
 # Download the street network for the area
 G = ox.graph_from_point(start_location, dist=5000, network_type='walk')
@@ -13,6 +19,8 @@ dest_node = ox.distance.nearest_nodes(G, end_location[1], end_location[0])
 
 # Calculate the shortest path
 shortest_path = ox.shortest_path(G, orig_node, dest_node, weight='length')
+
+print("Found shortest path!")
 
 midpoint = ((start_location[0] + end_location[0]) / 2, (start_location[1] + end_location[1]) / 2)
 m = folium.Map(location=midpoint, zoom_start=13, tiles="OpenStreetMap")

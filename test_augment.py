@@ -8,10 +8,7 @@ import shapely
 
 from pathlib import Path
 
-def test(html_output: str = "asd.html"):
-    start_location = (40.748817, -73.985428)  # New York (Latitude, Longitude)
-    end_location = (40.730610, -73.935242)    # New York (Latitude, Longitude)
-
+def test(html_output: str = "asd.html", start_location = (40.748817, -73.985428), end_location = (40.730610, -73.935242)):
     buildings_path = Path("data/buildings_dwnld.json")
     if buildings_path.exists():
         buildings = gpd.read_file(buildings_path)

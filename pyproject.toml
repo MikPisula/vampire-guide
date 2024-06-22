@@ -22,5 +22,10 @@ readme = "README.md"
 license = {text = "MIT"}
 
 
+[project.optional-dependencies]
+dev = [
+    "mypy>=1.10.0",
+    "pandas-stubs>=2.2.2.240603",
+]
 [tool.pdm]
 distribution = false

@@ -2,11 +2,15 @@ import osmnx as ox
 import folium
 import haversine as hs
 import shapely
+import pandas as pd
+import geopandas as gpd
+
+from typing import List
 
 def retrieve_route_polygons(start_location: tuple[float, float], 
-                       end_location: tuple[float, float], 
-                       search_margin=0.1, 
-                       polygon_buffer_dist=50) -> list[shapely.geometry.Polygon]:
+                            end_location: tuple[float, float], 
+                            search_margin=0.1, 
+                            polygon_buffer_dist=50) -> gpd.GeoDataFrame:
     """
         Retrieve building polygons along the route between two locations.
 
@@ -34,22 +38,13 @@ def retrieve_route_polygons(start_location: tuple[float, float],
     # Extract route coordinates
     route_coords = [(G.nodes[node]['y'], G.nodes[node]['x']) for node in shortest_path]
 
-    polygons = []
-    
     # Extract building polygons along the route
+    allbldgs: List[gpd.GeoDataFrame] = []
     for node in route_coords:
-        buildings = ox.features_from_point(node, {"building": True}, polygon_buffer_dist)
-        
-        for geometry in buildings['geometry']:
-            try:
-                coords = tuple(geometry.exterior.coords)
-                inverted_coords = tuple((y, x) for x, y in coords)
-                polygon = shapely.geometry.Polygon(inverted_coords)
-                polygons.append(polygon)
-            except Exception as e:
-                print(f"Error processing building geometry: {e}")
-    
-    return polygons
+        allbldgs.append(ox.features_from_point(node, {"building": True}, polygon_buffer_dist))
+    allbldgs = pd.concat(allbldgs)
+    allbldgs['height'] = allbldgs['height'].astype(float)
+    return allbldgs.loc[:, ["geometry", "height"]]
 
 def test():
 

@@ -7,6 +7,15 @@ WORKDIR /app
 # Copy the current directory contents into the container at /app
 COPY . /app
 
+# install curl
+RUN apt-get update && apt-get install -y curl
+
+# install pdm 
+RUN curl -sSL https://pdm-project.org/install-pdm.py | python3 -
+
+# pdm sync
+RUN /root/.local/bin/pdm sync
+
 # Update pip
 RUN pip install --upgrade pip
 
@@ -17,4 +26,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 EXPOSE 80
 
 # Run app.py when the container launches
-# CMD ["python", "app.py"] # TBD
+CMD ["python", "test_augment.py"]

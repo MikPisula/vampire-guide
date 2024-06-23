@@ -51,9 +51,11 @@ async function prepareArea() {
   getShadows(response.id, Date.now());
 }
 
-watchEffect(async () => {
+const normal_route = ref(null);
+const shadow_route = ref(null);
 
-  console.log(start.value)
+watchEffect(async () => {
+  if (shadow_id.value === null) return;
 
   let response = await (
     await fetch(
@@ -62,6 +64,21 @@ watchEffect(async () => {
   ).json();
 
   console.log(response);
+
+  if (normal_route.value !== null && shadow_route.value !== null) {
+    normal_route.value.removeFrom(map.value.leafletObject);
+    shadow_route.value.removeFrom(map.value.leafletObject);
+  }
+
+  normal_route.value = L.polyline(response.normal_route.coords, {
+    color: response.normal_route.color,
+    opacity: response.normal_route.opacity,
+  }).addTo(map.value.leafletObject);
+
+  shadow_route.value = L.polyline(response.shadow_route.coords, {
+    color: response.shadow_route.color,
+    opacity: response.shadow_route.opacity,
+  }).addTo(map.value.leafletObject);
 });
 </script>
 

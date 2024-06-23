@@ -29,7 +29,7 @@ class Area:
     routing_network: nx.MultiDiGraph
 
     def get_buildings(self) -> list[Polygon]:
-        return to_polys(self.buildings['geometry'])
+        return to_polys(self.buildings['geometry'], fill_color="#bbb", opacity=1)
     
     @classmethod
     def from_json(cls, data: dict[str, Any], buildings: gpd.GeoDataFrame, routing_network: nx.MultiDiGraph) -> 'Area':
@@ -65,7 +65,7 @@ class ShadowArea:
         self.shadows_mp: shapely.MultiPolygon = shapely.union_all(self.shadows['geometry'])
 
     def get_shadows(self) -> list[Polygon]:
-        return to_polys(self.shadows_mp.geoms)
+        return to_polys(self.shadows_mp.geoms, fill_color="#000", opacity=0.5)
     
     @classmethod
     def from_json(cls, data: dict[str, Any], shadows: gpd.GeoDataFrame) -> 'ShadowArea':
@@ -115,7 +115,7 @@ def get_route(area: Area, shadow: ShadowArea, start: tuple[float, float], end: t
 
     return RouteResult(shadow_route=shadow_line, normal_route=normal_line)
 
-def to_polys(geometry: pd.Series) -> list[Polygon]:
+def to_polys(geometry: pd.Series, fill_color: str, opacity: float) -> list[Polygon]:
     result = []
     for poly in geometry:
         if not hasattr(poly, 'exterior'):
@@ -124,7 +124,7 @@ def to_polys(geometry: pd.Series) -> list[Polygon]:
             continue
     
         inverted_coords = tuple((y, x) for x, y in poly.exterior.coords)
-        result.append(Polygon(coords=inverted_coords, fill_color="#bbb", fill_opacity=1))
+        result.append(Polygon(coords=inverted_coords, fill_color=fill_color, fill_opacity=opacity))
     return result
 
 def load_area(id: str) -> Area:

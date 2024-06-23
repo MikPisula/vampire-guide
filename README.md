@@ -18,15 +18,17 @@ Downloading polygons is really slow. Population density of Gdańsk is 712/sqkm, 
 If it takes a minute for a major Polish City, maybe lets download the whole Poland?
 
 ### Running the app
-##### API
-To run the API, execute the following command:
+##### Frontend Build
+Go to the `frontend` directory and run the following command:
+```bash
+npm run build
+```
+
+##### Server & Backend
+To serve the frontend and API, execute the following command:
+
 ```bash
 fastapi dev api.py
 ```
-make sure that dependencies are installed
 
-##### Frontend
-Go to the `frontend` directory and run the following command:
-```bash
-npm run [dev/start]
-```
+before executing the command make sure that all dependencies are installed

@@ -6,7 +6,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from datetime import datetime
 
-from area import AreaManager, ShadowAreaManager, Polygon
+from area import AreaManager, ShadowAreaManager, Polygon, RouteResult, get_route
 
 app = FastAPI()
 
@@ -23,11 +23,16 @@ def prepare_area(startlat: float, startlon: float,  endlat: float, endlon: float
 
 @app.get("/api/get_shadows")
 def get_shadows(area_id: str, time: datetime) -> None:
-    print(area_manager.areas)
     area = shadow_manager.new(area_manager.get(area_id), time)
 
     return {"id": area.id, "shadows": area.get_shadows()}
 
+@app.get("/api/route")
+def route(shadow_id: str, startlat: float, startlon: float, endlat: float, endlon: float) -> None:
+    shadow = shadow_manager.get(shadow_id)
+    area = area_manager.get(shadow.area_id)
+
+    return get_route(area, shadow, (startlat, startlon), (endlat, endlon))
 
 @app.get("/api/test_augment")
 def test_augment(prefix_url = "/home/simon/Documents/vampire-guide/", start = "40.7466991,-73.9809522", end = "40.7478495,-73.9843726"):

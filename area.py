@@ -9,6 +9,7 @@ import networkx as nx
 import json
 from typing import Any
 from pydantic import BaseModel
+from augment_graph import intersection_len_fun
 
 from pathlib import Path
 
@@ -32,7 +33,7 @@ class Area:
     
     @classmethod
     def from_json(cls, data: dict[str, Any], buildings: gpd.GeoDataFrame, routing_network: nx.MultiDiGraph) -> 'Area':
-        return cls(data['id'], data['start'], data['end'], buildings, routing_network)
+        return cls(data['id'], tuple(data['start']), tuple(data['end']), buildings, routing_network)
 
 class AreaManager:
     def __init__(self) -> None:
@@ -89,6 +90,30 @@ class ShadowAreaManager:
             self.shadows[id] = load_shadow_area(id)
         return self.shadows[id]
 
+class LineString(BaseModel):
+    coords: list[tuple[float, float]]
+    color: str
+    opacity: float
+
+class RouteResult(BaseModel):
+    shadow_route: LineString
+    normal_route: LineString
+
+def get_route(area: Area, shadow: ShadowArea, start: tuple[float, float], end: tuple[float, float]) -> LineString:
+    orig_node = ox.distance.nearest_nodes(area.routing_network, start[1], start[0])
+    dest_node = ox.distance.nearest_nodes(area.routing_network, end[1], end[0])
+
+    shadow_path = ox.shortest_path(area.routing_network, orig_node, dest_node,
+                                   weight=intersection_len_fun(area.routing_network, shadow.shadows_mp))
+    normal_path = ox.shortest_path(area.routing_network, orig_node, dest_node, weight='length')
+
+    shadow_coords = [(area.routing_network.nodes[node]['y'], area.routing_network.nodes[node]['x']) for node in shadow_path]
+    normal_coords = [(area.routing_network.nodes[node]['y'], area.routing_network.nodes[node]['x']) for node in normal_path]
+
+    shadow_line = LineString(coords=shadow_coords, color='blue', opacity=0.7)
+    normal_line = LineString(coords=normal_coords, color='green', opacity=0.7)
+
+    return RouteResult(shadow_route=shadow_line, normal_route=normal_line)
 
 def to_polys(geometry: pd.Series) -> list[Polygon]:
     result = []

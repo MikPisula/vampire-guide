@@ -16,3 +16,17 @@ Also: `pip install -r requirements.txt`
 Downloading polygons is really slow. Population density of Gdańsk is 712/sqkm, NYC is 96/hectar, so Gdańsk is 13 times less densely populated. A circle of area 20sqkm from which NYC data was downloaded in 5 minutes. Hence in Gdańsk it could be 13 (lets say 10) times faster. So 30 seconds per 20sqkm, and for entire Gdańsk of 260sqkm it would take around a minute.
 
 If it takes a minute for a major Polish City, maybe lets download the whole Poland?
+
+### Running the app
+##### API
+To run the API, execute the following command:
+```bash
+fastapi dev api.py
+```
+make sure that dependencies are installed
+
+##### Frontend
+Go to the `frontend` directory and run the following command:
+```bash
+npm run [dev/start]
+```

@@ -56,5 +56,3 @@ def test_augment(prefix_url = "/home/simon/Documents/vampire-guide/", start = "4
     map_file = FileResponse(filename_html, headers={"Cache-Control": "no-cache"})
     
     return map_file
-
-app.mount('/', StaticFiles(directory="frontend/dist", html=True))

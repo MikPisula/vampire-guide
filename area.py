@@ -174,7 +174,7 @@ def prepare_area(id: str, start: tuple[float, float], end=tuple[float, float]) -
         G = ox.graph_from_bbox(bbox=(start[0], end[0], start[1], end[1]), network_type='walk')
         ox.save_graphml(G, routing_network)
 
-    return Area(id, start, end, buildings, routing_network)
+    return Area(id, start, end, buildings, G)
 
 def prepare_shadow_area(id: str, area: Area, time: pd.Timestamp) -> ShadowArea:
     cache_prefix = CACHE_PATH / id[0] / id

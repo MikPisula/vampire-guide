@@ -5,3 +5,4 @@ pybdshadow/**
 **/*.html
 __pycache__/**/*
 **/.vite/**/*
+.cache

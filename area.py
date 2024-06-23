@@ -163,7 +163,13 @@ def prepare_area(id: str, start: tuple[float, float], end=tuple[float, float]) -
         buildings = ox.features_from_bbox(bbox=(start[0], end[0], start[1], end[1]),
                                                             tags={"building": True})
         buildings = buildings[['geometry', 'height']]
-        buildings['height'] = buildings['height'].astype(float)
+        def to_float(h):
+            try:
+                return float(h)
+            except:
+                return 5.0
+
+        buildings['height'] = buildings['height'].apply(to_float)
         buildings['height'] = buildings['height'].fillna(5.0)
         buildings_path.write_text(buildings.to_json())
 

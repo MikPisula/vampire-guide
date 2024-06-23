@@ -4,8 +4,30 @@ from test_augment import test
 from starlette.responses import RedirectResponse
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
+from datetime import datetime
+
+from area import AreaManager, ShadowAreaManager, Polygon
 
 app = FastAPI()
+
+area_manager = AreaManager()
+shadow_manager = ShadowAreaManager()
+
+@app.get("/api/prepare_area")
+def prepare_area(startlat: float, startlon: float,  endlat: float, endlon: float) -> dict[str, str | list[Polygon]]:
+    start = (startlat, startlon)
+    end = (endlat, endlon)
+
+    area = area_manager.new(start, end)
+    return {"id": area.id, "buildings": area.get_buildings()}
+
+@app.get("/api/get_shadows")
+def get_shadows(area_id: str, time: datetime) -> None:
+    print(area_manager.areas)
+    area = shadow_manager.new(area_manager.get(area_id), time)
+
+    return {"id": area.id, "shadows": area.get_shadows()}
+
 
 @app.get("/api/test_augment")
 def test_augment(prefix_url = "/home/simon/Documents/vampire-guide/", start = "40.7466991,-73.9809522", end = "40.7478495,-73.9843726"):

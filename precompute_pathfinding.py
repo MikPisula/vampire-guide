@@ -172,7 +172,7 @@ class PrecomputedPathfinder:
                 intersection: float = shade.intersection(line).length
                 proportion_in_shade += intersection / line.length
 
-        return distance + proportion_in_shade
+        return distance + distance * proportion_in_shade * self.shade_impact
 
     def find_path(self, start, end):
         """

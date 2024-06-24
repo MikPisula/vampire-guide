@@ -1,6 +1,6 @@
 ![Landing](img/landing.jpg)
 
-From 21 June to 23 June 2024 at [Hack4ChangeTECH](https://hack4change.tech/) we created 
+From 21 to 23 June 2024 at [Hack4ChangeTECH](https://hack4change.tech/) we created 
 a tool to compute and aggregate shadow data from everywhere and anytime. We won the contest in 2 out of 3 categories: of the best project created during the Hackathon, as well as the public's favorite.
 
 ![Usecase](img/coolwalks.jpg)

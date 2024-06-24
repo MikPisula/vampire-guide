@@ -7,8 +7,8 @@ import L from "leaflet";
 const map = ref(null);
 const zoom = ref(16);
 
-const start = ref([40.748817, -73.985428]);
-const end = ref([40.743291339946865, -73.98000681558766]);
+const start = ref([40.75326495039258, -74.00637797812827]);
+const end = ref([40.74486127697681, -73.98732643968263]);
 
 const shadow_id = ref(null);
 
